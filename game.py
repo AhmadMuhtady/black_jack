@@ -25,3 +25,15 @@ def creat_deck():
 
 deck = creat_deck()
 random.shuffle(deck)
+
+
+def deal_card(deck):
+    if not isinstance(deck,list):
+        return
+    
+    card = deck.pop()
+    return card
+
+
+
+card = deal_card(deck)
