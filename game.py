@@ -1,3 +1,5 @@
+import random
+
 rules = """
 Player actions: hit (take a card) or stand (stop). Doubling down is optional; leave it for the stretch goal.
 Bust: over 21 loses right away. If the player busts, the dealer doesn't play that hand.
@@ -16,7 +18,10 @@ values = {'Two':2, 'Three':3, 'Four':4, 'Five':5, 'Six':6, 'Seven':7, 'Eight':8,
 
 
 def creat_deck():
-    deck = [(y,x) for y in ranks for x in suits]
-    return deck
+    deck = set([(y,x) for y in ranks for x in suits])
+    return list(deck)
 
 
+
+deck = creat_deck()
+random.shuffle(deck)
