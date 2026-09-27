@@ -19,6 +19,9 @@ values = {'Two':2, 'Three':3, 'Four':4, 'Five':5, 'Six':6, 'Seven':7, 'Eight':8,
 
 def creat_deck():
     deck = set([(y,x) for y in ranks for x in suits])
+    if len(deck) != 52:
+        return 'Failed to create Deck'
+        
     return list(deck)
 
 
@@ -29,7 +32,7 @@ random.shuffle(deck)
 
 def deal_card(deck):
     if not isinstance(deck,list):
-        return
+        raise TypeError("Deck must be a List")
     
     card = deck.pop()
     return card
