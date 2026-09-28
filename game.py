@@ -11,6 +11,7 @@ Dealer: hit on 16 or less, stand on 17 or more. The dealer makes no decisions.
 
 BLACKJACK = 21
 DEALER_STANDS_ON = 17
+MIN_BET = 1
 suits = ('Hearts', 'Diamonds', 'Spades', 'Clubs')
 ranks = ('Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Jack', 'Queen', 'King', 'Ace')
 values = {'Two':2, 'Three':3, 'Four':4, 'Five':5, 'Six':6, 'Seven':7, 'Eight':8, 'Nine':9, 'Ten':10, 'Jack':10, 'Queen':10, 'King':10, 'Ace':1}
@@ -137,6 +138,25 @@ def determine_outcome(player_hand, dealer_hand):
         return 'push'
 
     
+
+def get_bet(bankroll):
+    if bankroll <= 0:
+       raise ValueError(f"Cannot place a bet with a bankroll of {bankroll}.")
+    while True:
+        user_bet = input(f"Current bankroll: ${bankroll}. Enter your bet: ").strip()
+
+        try:
+            bet = int(user_bet)
+        except ValueError:
+            print("Invalid input. Please enter a whole number.")
+            continue
+
+        if bet <= MIN_BET:
+            print('Bet should be Higher than {MIN_BET}')
+        elif bet > bankroll:
+            print(f"You cannot bet more than your bankroll (${bankroll}).")
+        else:
+            return bet
 
 test_hands = [
     ([('Five', 'Hearts'), ('Nine', 'Clubs')], 14),
