@@ -9,7 +9,7 @@ Dealer: your rule is right: hit on 16 or less, stand on 17 or more. The dealer m
 
 """
 
-
+blackjack = 21
 suits = ('Hearts', 'Diamonds', 'Spades', 'Clubs')
 ranks = ('Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Jack', 'Queen', 'King', 'Ace')
 values = {'Two':2, 'Three':3, 'Four':4, 'Five':5, 'Six':6, 'Seven':7, 'Eight':8, 'Nine':9, 'Ten':10, 'Jack':10, 'Queen':10, 'King':10, 'Ace':1}
@@ -37,12 +37,11 @@ def deal_card(deck):
     return card
 
 
-def calculate_score(hand):
+def calculate_score(hand,blackjack=blackjack):
     if not isinstance(hand,list):
         raise TypeError("Hand must be a List")   
 
     hand_score = 0
-    BLACKJACK = 21
     has_ace = False
 
     for card in hand:
@@ -53,7 +52,7 @@ def calculate_score(hand):
         hand_score += card_value
 
 
-    if has_ace and ((hand_score + 10) <= BLACKJACK):
+    if has_ace and ((hand_score + 10) <= blackjack):
         hand_score += 10
 
     return hand_score
@@ -70,6 +69,42 @@ def dealer_play(deck, current_hand):
 
     return dealer_score
 
+
+def calculate_payout(bet_amount, outcome, **kwargs):
+    allowed_keys = {'win_payout', 'blackjack_payout'}
+    unexpected_keys = set(kwargs) - allowed_keys
+
+    if unexpected_keys:
+        raise TypeError(f"payout got unexpected Ratio Type: {', '.join(sorted(unexpected_keys))}")
+
+    for key in kwargs:
+        if key not in allowed_keys:
+            raise TypeError(f"Unknown ratio type: {key}")
+
+
+    win_ratio = kwargs.get('win_payout',1.0)
+    blackjack_ratio = kwargs.get('blackjack_payout',1.5)
+   
+
+    outcome = outcome.lower()
+
+    if outcome in ('loss','bust'):
+        return -bet_amount
+    elif outcome == 'push':
+        return 0
+    elif outcome == 'win':
+        return bet_amount * win_ratio
+    elif outcome == 'blackjack':
+        return bet_amount * blackjack_ratio
+    else:
+        raise ValueError(f'Unkown hand outcome {outcome}')
+
+
+def is_natural(hand,blackjack=blackjack):
+    if not isinstance(hand, list):
+         raise TypeError("Hand must be a List")
+    
+    return len(hand) == 2 and calculate_score(hand) == blackjack
 
 
 
