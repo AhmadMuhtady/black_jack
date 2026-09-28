@@ -60,7 +60,15 @@ def calculate_score(hand):
     
 
 
+def dealer_play(deck, current_hand):
+    dealer_score = calculate_score(current_hand)
+    DEALER_STANDS_ON = 17
+    while dealer_score < DEALER_STANDS_ON:
+        new_card = deal_card(deck)
+        current_hand.append(new_card)
+        dealer_score = calculate_score(current_hand) 
 
+    return dealer_score
 
 
 
@@ -84,5 +92,3 @@ if __name__ == "__main__":
     deck = creat_deck()
     random.shuffle(deck)
     card = deal_card(deck)
-    print(card)
-
