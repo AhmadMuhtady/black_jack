@@ -151,12 +151,33 @@ def get_bet(bankroll):
             print("Invalid input. Please enter a whole number.")
             continue
 
-        if bet <= MIN_BET:
-            print('Bet should be Higher than {MIN_BET}')
+        if bet < MIN_BET:
+            print('Bet should be Higher or equal to {MIN_BET}')
         elif bet > bankroll:
             print(f"You cannot bet more than your bankroll (${bankroll}).")
         else:
             return bet
+
+
+def get_action():
+    action_map = {
+        'h': 'hit',
+        'hit': 'hit',
+        's': 'stand',
+        'stand': 'stand'
+        }
+
+    while True:
+        user_input = input("Do you want to [H]it or [S]tand?: ")
+
+        user_action = user_input.strip().lower()
+
+        if user_action not in action_map:
+            print(f'Please Enter [H]it or [S]tand: your previous input {user_input}')
+            continue
+        
+        
+        return action_map[user_action]
 
 test_hands = [
     ([('Five', 'Hearts'), ('Nine', 'Clubs')], 14),
