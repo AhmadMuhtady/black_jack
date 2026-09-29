@@ -139,45 +139,76 @@ def determine_outcome(player_hand, dealer_hand):
 
     
 
-def get_bet(bankroll):
-    if bankroll <= 0:
-       raise ValueError(f"Cannot place a bet with a bankroll of {bankroll}.")
+
+def prompt_int(prompt_message, error_message):
+    """Prompt until the user enters a valid whole number >= MIN_BET."""
     while True:
-        user_bet = input(f"Current bankroll: ${bankroll}. Enter your bet: ").strip()
+        raw_val = input(prompt_message).strip()
 
         try:
-            bet = int(user_bet)
+            val = int(raw_val)
         except ValueError:
             print("Invalid input. Please enter a whole number.")
             continue
 
-        if bet < MIN_BET:
-            print(f'Bet should be Higher or equal to {MIN_BET}')
-        elif bet > bankroll:
+        if val < MIN_BET:
+            print(error_message)
+            continue
+
+        return val
+
+
+def get_bankroll():
+    bankroll = prompt_int(
+        "Please Deposit money to play: ",
+        f"Deposit amount should be Higher or equal to {MIN_BET}"
+    )
+    print(f"${bankroll} has been deposited successfully!")
+    return bankroll
+
+
+def get_bet(bankroll):
+    if bankroll < MIN_BET:
+        raise ValueError(f"Cannot place a bet with a bankroll of {bankroll}.")
+
+    while True:
+        bet = prompt_int(
+            f"Current bankroll: ${bankroll}. Enter your bet: ",
+            f"Bet should be Higher or equal to {MIN_BET}"
+        )
+
+        if bet > bankroll:
             print(f"You cannot bet more than your bankroll (${bankroll}).")
-        else:
-            return bet
+            continue
+
+        return bet
+
+
+def prompt_choice(prompt_message, action_map):
+    while True:
+        user_input = input(prompt_message)
+        cleaned_input = user_input.strip().lower()
+
+        if cleaned_input not in action_map:
+            valid_options = "/".join(sorted(set(action_map.values())))
+            print(f"Invalid input '{user_input}'. Please choose: {valid_options}")
+            continue
+
+        return action_map[cleaned_input]
 
 
 def get_action():
-    action_map = {
-        'h': 'hit',
-        'hit': 'hit',
-        's': 'stand',
-        'stand': 'stand'
-        }
+    return prompt_choice(
+        "Do you want to [H]it or [S]tand?: ",
+        {"h": "hit", "hit": "hit", "s": "stand", "stand": "stand"}
+    )
 
-    while True:
-        user_input = input("Do you want to [H]it or [S]tand?: ")
 
-        user_action = user_input.strip().lower()
-
-        if user_action not in action_map:
-            print(f'Please Enter [H]it or [S]tand: your previous input {user_input}')
-            continue
-        
-        
-        return action_map[user_action]
+def get_another_round():
+    return prompt_choice(
+        "Do you want to play another round [Y]ES or [N]O?: ",
+        {"y": "yes", "yes": "yes", "n": "no", "no": "no"}
+    )
 
 def player_turn(deck, hand):
     score = calculate_score(hand)
@@ -235,31 +266,36 @@ def play_round(deck, bankroll):
 
     return bankroll
 
-def gat_bankroll():
-    while True:
-        deposit = input('Please Deposit money to play:')
-        try:
-            bankroll = int(deposit)
-        except ValueError:
-            print("Invalid input. Please enter a whole number.")
-            continue
-
-        if bankroll < MIN_BET:
-            print(f'Deposit ammount should be Higher or equal to {MIN_BET}')
-        else:
-            print(f'${bankroll} has been deposited successfully!')
-            return bankroll
 
 
 def game():
-    bankroll = gat_bankroll()
+    bankroll = get_bankroll()
+    round_number = 1
+
+
+    while True:
+        deck = create_deck()
+        random.shuffle(deck)
+        bankroll = play_round(deck, bankroll)
+
+        if bankroll < MIN_BET:
+            print(f'Your bankroll is {bankroll}. Please Deposit Money to play Again!')
+            break
+
+        player_action = get_another_round()
+        
+        if player_action == 'yes':
+            round_number += 1
+            print(f'Ready for Round {round_number}')
+            continue
+        else:
+            print('Thank you for playing see you again soon.')
+            break
+        
 
 
 if __name__ == "__main__":
     print("\n--- Starting Live Hand ---")
-    deck = create_deck()
-    random.shuffle(deck)
-    bankroll = 100
-    bankroll = play_round(deck, bankroll)
+
 
     
