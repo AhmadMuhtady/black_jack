@@ -49,12 +49,6 @@ def display_hand(hand):
     return " ".join(format_card(c) for c in hand)
 
 
-def create_deck():
-    deck = set([(y, x) for y in ranks for x in suits])
-    if len(deck) != 52:
-        raise ValueError(f"Deck must have 52 cards, got {len(deck)} cards")
-    return list(deck)
-
 
 
 def create_deck():
@@ -103,9 +97,11 @@ def dealer_play(deck, current_hand):
     dealer_score = calculate_score(current_hand)
 
     while dealer_score < DEALER_STANDS_ON:
+        time.sleep(1.0)
         new_card = deal_card(deck)
         current_hand.append(new_card)
-        dealer_score = calculate_score(current_hand) 
+        dealer_score = calculate_score(current_hand)
+        print(f"Dealer hits: {format_card(new_card)} | Hand: {display_hand(current_hand)} (Score: {dealer_score})")
 
     return dealer_score
 
@@ -147,50 +143,47 @@ def determine_outcome(player_hand, dealer_hand):
     if not (isinstance(player_hand, list) and isinstance(dealer_hand, list)):
         raise TypeError("Hands must be lists")
     
-    is_player_nutral = is_natural(player_hand)
-    is_dealer_nutral = is_natural(dealer_hand)
+    is_player_natural = is_natural(player_hand)
+    is_dealer_natural = is_natural(dealer_hand)
 
     player_score = calculate_score(player_hand)
     dealer_score = calculate_score(dealer_hand)
 
     if player_score > BLACKJACK:
         return 'bust'
-
     
-    if is_player_nutral and is_dealer_nutral:
+    if is_player_natural and is_dealer_natural:
         return 'push'
-    elif is_player_nutral:
+    elif is_player_natural:
         return 'blackjack'
-    elif is_dealer_nutral:
+    elif is_dealer_natural:
         return 'loss'
 
     if dealer_score > BLACKJACK:
         return 'win'
-    
 
     if player_score > dealer_score:
         return 'win'
     elif dealer_score > player_score:
         return 'loss'
-    elif player_score == dealer_score:
+    else:
         return 'push'
 
     
 
 
 def prompt_int(prompt_message, error_message):
-    """Prompt until the user enters a valid whole number >= MIN_BET."""
     while True:
         raw_val = input(prompt_message).strip()
 
         try:
             val = int(raw_val)
         except ValueError:
-            print("Invalid input. Please enter a whole number.")
+            print(f"{RED}Invalid input. Please enter a whole number.{RESET}")
             continue
 
         if val < MIN_BET:
-            print(error_message)
+            print(f"{RED}{error_message}{RESET}")
             continue
 
         return val
@@ -201,7 +194,7 @@ def get_bankroll():
         "Please Deposit money to play: ",
         f"Deposit amount should be Higher or equal to {MIN_BET:.2f}"
     )
-    print(f"${bankroll:.2f} has been deposited successfully!")
+    print(f"{GREEN}${bankroll:.2f} has been deposited successfully!{RESET}\n")
     return bankroll
 
 
@@ -211,12 +204,12 @@ def get_bet(bankroll):
 
     while True:
         bet = prompt_int(
-            f"Current bankroll: ${bankroll:.2f}. Enter your bet: ",
+            f"Current bankroll: {BOLD}${bankroll:.2f}{RESET}. Enter your bet: $",
             f"Bet should be Higher or equal to {MIN_BET:.2f}"
         )
 
         if bet > bankroll:
-            print(f"You cannot bet more than your bankroll (${bankroll:.2f}).")
+            print(f"{RED}You cannot bet more than your bankroll (${bankroll:.2f}).{RESET}")
             continue
 
         return bet
@@ -229,7 +222,7 @@ def prompt_choice(prompt_message, action_map):
 
         if cleaned_input not in action_map:
             valid_options = "/".join(sorted(set(action_map.values())))
-            print(f"Invalid input '{user_input}'. Please choose: {valid_options}")
+            print(f"{RED}Invalid input '{user_input}'. Please choose: {valid_options}{RESET}")
             continue
 
         return action_map[cleaned_input]
@@ -237,104 +230,123 @@ def prompt_choice(prompt_message, action_map):
 
 def get_action():
     return prompt_choice(
-        "Do you want to [H]it or [S]tand?: ",
+        f"{YELLOW}Do you want to [H]it or [S]tand?: {RESET}",
         {"h": "hit", "hit": "hit", "s": "stand", "stand": "stand"}
     )
 
 
 def get_another_round():
     return prompt_choice(
-        "Do you want to play another round [Y]ES or [N]O?: ",
+        f"{YELLOW}Do you want to play another round [Y]ES or [N]O?: {RESET}",
         {"y": "yes", "yes": "yes", "n": "no", "no": "no"}
     )
 
+# In player_turn():
 def player_turn(deck, hand):
     score = calculate_score(hand)
 
     while score < BLACKJACK:
-        print(f"\nYour hand: {hand} | Score: {score}")
+        print(f"\nYour hand: {display_hand(hand)} | Score: {score}")
 
         action = get_action()
 
         if action == 'hit':
             card = deal_card(deck)
             hand.append(card)
-            print(f"You drew: {card}")
+            print(f"You drew: {format_card(card)}")
             
             score = calculate_score(hand)
-            if score > BLACKJACK :
-                print(f"Busted with {score}!")
+            print(f"Your hand: {display_hand(hand)} | Score: {score}")
+            if score > BLACKJACK:
+                print(f"{RED}Busted with {score}!{RESET}")
                 break
             elif score == BLACKJACK:
-                print(f'Your score is now: {score}! Standing automatically')
+                print(f"{GREEN}21! Standing automatically.{RESET}")
                 break
         else:
             print(f"You chose to stand at {score}.")
             break
-    return score  
+    return score
 
 
-def play_round(deck, bankroll):
+def play_round(deck, bankroll,round_number):
+    print(f"\n{CYAN}{'='*15} ROUND {round_number} {'='*15}{RESET}")
     bet = get_bet(bankroll)
 
     player_hand = [deal_card(deck) for _ in range(2)]
     dealer_hand = [deal_card(deck) for _ in range(2)]
-    print(f"\nYour hand: {player_hand} | Score: {calculate_score(player_hand)}")
-    print(f"Dealer shows: {dealer_hand[0]}")
+    print(f"\nYour hand:   {display_hand(player_hand)} | Score: {calculate_score(player_hand)}")
+    print(f"Dealer shows: {format_card(dealer_hand[0])} [?]")
 
     if is_natural(player_hand) or is_natural(dealer_hand):
-            print(f"Dealer reveals hole card: {dealer_hand[1]}")
+            print(f"\nDealer reveals hole card: {format_card(dealer_hand[1])}")
+            print(f"Dealer hand:  {display_hand(dealer_hand)} | Score: {calculate_score(dealer_hand)}")
     else:
         player_score = player_turn(deck, player_hand)
         
         
+
         if player_score <= BLACKJACK:
-            print(f"\nDealer reveals hole card: {dealer_hand[1]}")
+            print(f"\nDealer reveals hole card: {format_card(dealer_hand[1])}")
             dealer_play(deck, dealer_hand)
-            print(f"Dealer finishes with: {dealer_hand} | Score: {calculate_score(dealer_hand)}")
+            print(f"Dealer finishes with: {display_hand(dealer_hand)} | Score: {calculate_score(dealer_hand)}")
 
     
     outcome = determine_outcome(player_hand, dealer_hand)
     
     payout = calculate_payout(bet,outcome)
     bankroll += payout
+    if outcome in ('win', 'blackjack'):
+        color = GREEN
+    elif outcome == 'push':
+        color = YELLOW
+    else:
+        color = RED
 
-    print(f"\nRound Result: {outcome.upper()}!")
-    print(f"Net change: {'+' if payout > 0 else ''}{payout}")
-    print(f"Current Bankroll: ${bankroll}\n")
+    print(f"\n{color}{BOLD}Round Result: {outcome.upper()}!{RESET}")
+    print(f"Net change: {color}{'+' if payout > 0 else ''}{payout:.2f}{RESET}")
+    print(f"Current Bankroll: {BOLD}${bankroll:.2f}{RESET}\n")
 
     return bankroll
 
 
 
 def game():
+    clear_screen()
+    print(f"{BOLD}=== WELCOME TO BLACKJACK ==={RESET}\n")
     bankroll = get_bankroll()
     round_number = 1
 
+    # Keep a running shoe across rounds
+    deck = create_deck()
+    random.shuffle(deck)
 
     while True:
-        deck = create_deck()
-        random.shuffle(deck)
-        bankroll = play_round(deck, bankroll)
+        # Reshuffle if shoe gets low (< 15 cards)
+        if len(deck) < 15:
+            print(f"{YELLOW}[Reshuffling deck...]{RESET}")
+            deck = create_deck()
+            random.shuffle(deck)
+
+        bankroll = play_round(deck, bankroll, round_number)
 
         if bankroll < MIN_BET:
-            print(f'Your bankroll is {bankroll:.2f}. Please Deposit Money to play Again!')
+            print(f"{RED}Bankroll is ${bankroll:.2f}. You ran out of money!{RESET}")
             break
 
         player_action = get_another_round()
         
         if player_action == 'yes':
             round_number += 1
-            print(f'Ready for Round {round_number}')
+            clear_screen()
             continue
         else:
-            print('Thank you for playing see you again soon.')
+            print(f"\n{BOLD}Cashing out with ${bankroll:.2f}. Thanks for playing!{RESET}")
             break
         
 
 
 if __name__ == "__main__":
-    print("\n--- Starting Live Hand ---")
     game()
 
     
