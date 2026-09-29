@@ -1,4 +1,6 @@
+import os
 import random
+import time
 
 rules = """
 Player actions: hit (take a card) or stand (stop). Doubling down is optional; leave it for the stretch goal.
@@ -12,10 +14,46 @@ Dealer: hit on 16 or less, stand on 17 or more. The dealer makes no decisions.
 BLACKJACK = 21
 DEALER_STANDS_ON = 17
 MIN_BET = 1
+
+
+GREEN = "\033[92m"
+RED = "\033[91m"
+YELLOW = "\033[93m"
+CYAN = "\033[96m"
+BOLD = "\033[1m"
+RESET = "\033[0m"
+
+
 suits = ('Hearts', 'Diamonds', 'Spades', 'Clubs')
 ranks = ('Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Jack', 'Queen', 'King', 'Ace')
 values = {'Two':2, 'Three':3, 'Four':4, 'Five':5, 'Six':6, 'Seven':7, 'Eight':8, 'Nine':9, 'Ten':10, 'Jack':10, 'Queen':10, 'King':10, 'Ace':1}
+suit_symbols = {'Hearts': '♥', 'Diamonds': '♦', 'Spades': '♠', 'Clubs': '♣'}
+rank_short = {
+    'Two': '2', 'Three': '3', 'Four': '4', 'Five': '5', 'Six': '6',
+    'Seven': '7', 'Eight': '8', 'Nine': '9', 'Ten': '10',
+    'Jack': 'J', 'Queen': 'Q', 'King': 'K', 'Ace': 'A'
+}
 
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+
+def format_card(card):
+    rank, suit = card
+    symbol = suit_symbols[suit]
+    card_color = RED if suit in ('Hearts', 'Diamonds') else RESET
+    return f"[{BOLD}{rank_short[rank]}{card_color}{symbol}{RESET}]"
+
+
+def display_hand(hand):
+    return " ".join(format_card(c) for c in hand)
+
+
+def create_deck():
+    deck = set([(y, x) for y in ranks for x in suits])
+    if len(deck) != 52:
+        raise ValueError(f"Deck must have 52 cards, got {len(deck)} cards")
+    return list(deck)
 
 
 
@@ -161,9 +199,9 @@ def prompt_int(prompt_message, error_message):
 def get_bankroll():
     bankroll = prompt_int(
         "Please Deposit money to play: ",
-        f"Deposit amount should be Higher or equal to {MIN_BET}"
+        f"Deposit amount should be Higher or equal to {MIN_BET:.2f}"
     )
-    print(f"${bankroll} has been deposited successfully!")
+    print(f"${bankroll:.2f} has been deposited successfully!")
     return bankroll
 
 
@@ -173,12 +211,12 @@ def get_bet(bankroll):
 
     while True:
         bet = prompt_int(
-            f"Current bankroll: ${bankroll}. Enter your bet: ",
-            f"Bet should be Higher or equal to {MIN_BET}"
+            f"Current bankroll: ${bankroll:.2f}. Enter your bet: ",
+            f"Bet should be Higher or equal to {MIN_BET:.2f}"
         )
 
         if bet > bankroll:
-            print(f"You cannot bet more than your bankroll (${bankroll}).")
+            print(f"You cannot bet more than your bankroll (${bankroll:.2f}).")
             continue
 
         return bet
@@ -241,6 +279,7 @@ def play_round(deck, bankroll):
 
     player_hand = [deal_card(deck) for _ in range(2)]
     dealer_hand = [deal_card(deck) for _ in range(2)]
+    print(f"\nYour hand: {player_hand} | Score: {calculate_score(player_hand)}")
     print(f"Dealer shows: {dealer_hand[0]}")
 
     if is_natural(player_hand) or is_natural(dealer_hand):
@@ -279,7 +318,7 @@ def game():
         bankroll = play_round(deck, bankroll)
 
         if bankroll < MIN_BET:
-            print(f'Your bankroll is {bankroll}. Please Deposit Money to play Again!')
+            print(f'Your bankroll is {bankroll:.2f}. Please Deposit Money to play Again!')
             break
 
         player_action = get_another_round()
@@ -296,6 +335,6 @@ def game():
 
 if __name__ == "__main__":
     print("\n--- Starting Live Hand ---")
-
+    game()
 
     
