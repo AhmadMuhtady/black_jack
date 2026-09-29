@@ -204,6 +204,39 @@ def player_turn(deck, hand):
             break
     return score  
 
+
+def play_round(deck, bankroll):
+    bet = get_bet(bankroll)
+
+    player_hand = [deal_card(deck) for _ in range(2)]
+    dealer_hand = [deal_card(deck) for _ in range(2)]
+
+    print(f'your hand: {player_hand}')
+    print(f"Dealer shows: {dealer_hand[0]}")
+
+    if is_natural(player_hand) or is_natural(dealer_hand):
+            print(f"Dealer reveals hole card: {dealer_hand[1]}")
+    else:
+        player_score = player_turn(deck, player_hand)
+        
+        
+        if player_score <= BLACKJACK:
+            print(f"\nDealer reveals hole card: {dealer_hand[1]}")
+            dealer_play(deck, dealer_hand)
+            print(f"Dealer finishes with: {dealer_hand} | Score: {calculate_score(dealer_hand)}")
+
+    
+    outcome = determine_outcome(player_hand, dealer_hand)
+    
+    payout = calculate_payout(bet,outcome)
+    bankroll += payout
+
+    print(f"\nRound Result: {outcome.upper()}!")
+    print(f"Net change: {'+' if payout > 0 else ''}{payout}")
+    print(f"Current Bankroll: ${bankroll}\n")
+
+    return bankroll
+
 test_hands = [
     ([('Five', 'Hearts'), ('Nine', 'Clubs')], 14),
     ([('King', 'Hearts'), ('Queen', 'Clubs')], 20),
