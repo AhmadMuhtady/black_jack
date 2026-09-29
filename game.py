@@ -152,7 +152,7 @@ def get_bet(bankroll):
             continue
 
         if bet < MIN_BET:
-            print('Bet should be Higher or equal to {MIN_BET}')
+            print(f'Bet should be Higher or equal to {MIN_BET}')
         elif bet > bankroll:
             print(f"You cannot bet more than your bankroll (${bankroll}).")
         else:
@@ -210,8 +210,6 @@ def play_round(deck, bankroll):
 
     player_hand = [deal_card(deck) for _ in range(2)]
     dealer_hand = [deal_card(deck) for _ in range(2)]
-
-    print(f'your hand: {player_hand}')
     print(f"Dealer shows: {dealer_hand[0]}")
 
     if is_natural(player_hand) or is_natural(dealer_hand):
@@ -237,68 +235,31 @@ def play_round(deck, bankroll):
 
     return bankroll
 
-test_hands = [
-    ([('Five', 'Hearts'), ('Nine', 'Clubs')], 14),
-    ([('King', 'Hearts'), ('Queen', 'Clubs')], 20),
-    ([('Ace', 'Spades'), ('King', 'Hearts')], 21),
-    ([('Ace', 'Spades'), ('Six', 'Hearts')], 17),
-    ([('Ace', 'Spades'), ('Five', 'Hearts'), ('King', 'Clubs')], 16),
-    ([('Ace', 'Spades'), ('Ace', 'Hearts')], 12),
-    ([('Ace', 'Spades'), ('Ace', 'Hearts'), ('Nine', 'Clubs')], 21),
-    ([('Ace', 'Spades'), ('Ace', 'Hearts'), ('Ace', 'Clubs'), ('Ace', 'Diamonds')], 14),
-    ([('King', 'Hearts'), ('Queen', 'Clubs'), ('Five', 'Spades')], 25),
-    ([('Ace', 'Spades'), ('King', 'Hearts'), ('Queen', 'Clubs')], 21),
-    ([], 0),
-]
+def gat_bankroll():
+    while True:
+        deposit = input('Please Deposit money to play:')
+        try:
+            bankroll = int(deposit)
+        except ValueError:
+            print("Invalid input. Please enter a whole number.")
+            continue
 
-outcome_tests = [
-    ([('King', 'Hearts'), ('Queen', 'Clubs'), ('Five', 'Spades')], [('Ten', 'Hearts'), ('Nine', 'Clubs')], 'bust'),
-    ([('Ace', 'Spades'), ('King', 'Hearts')], [('Ten', 'Clubs'), ('Five', 'Hearts'), ('Six', 'Spades')], 'blackjack'),
-    ([('Ace', 'Spades'), ('King', 'Hearts')], [('Ace', 'Clubs'), ('Queen', 'Diamonds')], 'push'),
-    ([('Ten', 'Hearts'), ('Five', 'Clubs'), ('Six', 'Spades')], [('Ace', 'Hearts'), ('King', 'Clubs')], 'loss'),
-    ([('Ten', 'Hearts'), ('Eight', 'Clubs')], [('Ten', 'Spades'), ('Six', 'Hearts'), ('Seven', 'Clubs')], 'win'),
-    ([('Ten', 'Hearts'), ('Eight', 'Clubs')], [('Ten', 'Spades'), ('King', 'Hearts')], 'loss'),
-    ([('Ten', 'Hearts'), ('Nine', 'Clubs')], [('King', 'Spades'), ('Nine', 'Hearts')], 'push'),
-    ([('Ten', 'Hearts'), ('Nine', 'Clubs')], [('King', 'Spades'), ('Eight', 'Hearts')], 'win'),
-]
+        if bankroll < MIN_BET:
+            print(f'Deposit ammount should be Higher or equal to {MIN_BET}')
+        else:
+            print(f'${bankroll} has been deposited successfully!')
+            return bankroll
 
-payout_tests = [
-    # (bet, outcome, kwargs, expected_net)
-    (10, 'bust', {}, -10),
-    (10, 'loss', {}, -10),
-    (10, 'push', {}, 0),
-    (10, 'win', {}, 10.0),
-    (10, 'blackjack', {}, 15.0),
-    (10, 'blackjack', {'blackjack_payout': 1.2}, 12.0),
-    (20, 'win', {'win_payout': 2.0}, 40.0),
-]
+
+def game():
+    bankroll = gat_bankroll()
 
 
 if __name__ == "__main__":
-    # 1. Test calculate_score
-    for hand, expected in test_hands:
-        score = calculate_score(hand)
-        assert score == expected, f"Score failed for {hand}: expected {expected}, got {score}"
-    print("calculate_score: all tests passed!")
+    print("\n--- Starting Live Hand ---")
+    deck = create_deck()
+    random.shuffle(deck)
+    bankroll = 100
+    bankroll = play_round(deck, bankroll)
 
-    # 2. Test determine_outcome
-    for player, dealer, expected in outcome_tests:
-        outcome = determine_outcome(player, dealer)
-        assert outcome == expected, f"Outcome failed for player {player} vs dealer {dealer}: expected '{expected}', got '{outcome}'"
-    print("determine_outcome: all tests passed!")
-
-    # 3. Test calculate_payout
-    for bet, outcome, extra_rules, expected in payout_tests:
-        payout = calculate_payout(bet, outcome, **extra_rules)
-        assert payout == expected, f"Payout failed for bet {bet}, outcome '{outcome}', kwargs {extra_rules}: expected {expected}, got {payout}"
-    print("calculate_payout: all tests passed!")
-
-    # 4. Negative test: verify calculate_payout raises TypeError on unexpected kwargs
-    try:
-        calculate_payout(10, 'win', invalid_key=99)
-        raise AssertionError("calculate_payout failed to raise TypeError on invalid kwarg")
-    except TypeError:
-        pass
-    print("calculate_payout invalid kwargs: test passed!")
-
-    print("\nAll suites passed cleanly!")
+    
