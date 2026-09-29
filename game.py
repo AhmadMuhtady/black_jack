@@ -241,12 +241,10 @@ def get_another_round():
         {"y": "yes", "yes": "yes", "n": "no", "no": "no"}
     )
 
-# In player_turn():
 def player_turn(deck, hand):
     score = calculate_score(hand)
 
     while score < BLACKJACK:
-        print(f"\nYour hand: {display_hand(hand)} | Score: {score}")
 
         action = get_action()
 
@@ -279,8 +277,8 @@ def play_round(deck, bankroll,round_number):
     print(f"Dealer shows: {format_card(dealer_hand[0])} [?]")
 
     if is_natural(player_hand) or is_natural(dealer_hand):
-            print(f"\nDealer reveals hole card: {format_card(dealer_hand[1])}")
-            print(f"Dealer hand:  {display_hand(dealer_hand)} | Score: {calculate_score(dealer_hand)}")
+        print(f"\nDealer reveals hole card: {format_card(dealer_hand[1])}")
+        print(f"Dealer hand:  {display_hand(dealer_hand)} | Score: {calculate_score(dealer_hand)}")
     else:
         player_score = player_turn(deck, player_hand)
         
@@ -317,17 +315,10 @@ def game():
     bankroll = get_bankroll()
     round_number = 1
 
-    # Keep a running shoe across rounds
-    deck = create_deck()
-    random.shuffle(deck)
 
     while True:
-        # Reshuffle if shoe gets low (< 15 cards)
-        if len(deck) < 15:
-            print(f"{YELLOW}[Reshuffling deck...]{RESET}")
-            deck = create_deck()
-            random.shuffle(deck)
-
+        deck = create_deck()
+        random.shuffle(deck)
         bankroll = play_round(deck, bankroll, round_number)
 
         if bankroll < MIN_BET:
