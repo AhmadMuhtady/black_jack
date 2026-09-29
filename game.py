@@ -179,6 +179,31 @@ def get_action():
         
         return action_map[user_action]
 
+def player_turn(deck, hand):
+    score = calculate_score(hand)
+
+    while score < BLACKJACK:
+        print(f"\nYour hand: {hand} | Score: {score}")
+
+        action = get_action()
+
+        if action == 'hit':
+            card = deal_card(deck)
+            hand.append(card)
+            print(f"You drew: {card}")
+            
+            score = calculate_score(hand)
+            if score > BLACKJACK :
+                print(f"Busted with {score}!")
+                break
+            elif score == BLACKJACK:
+                print(f'Your score is now: {score}! Standing automatically')
+                break
+        else:
+            print(f"You chose to stand at {score}.")
+            break
+    return score  
+
 test_hands = [
     ([('Five', 'Hearts'), ('Nine', 'Clubs')], 14),
     ([('King', 'Hearts'), ('Queen', 'Clubs')], 20),
